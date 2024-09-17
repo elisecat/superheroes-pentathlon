@@ -1,11 +1,23 @@
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {},
+const defaultTheme = require('tailwindcss/defaultTheme')
+
+module.exports = {
+  mode: 'jit',
+  purge: {
+    enabled: process.env.NODE_ENV === 'production',
+    // classes that are generated dynamically, e.g. `rounded-${size}` and must
+    // be kept
+    safeList: [],
+    content: [
+      './index.html',
+      './src/**/*.{vue,js,ts}',
+      // etc.
+    ],
   },
-  plugins: [],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter var', ...defaultTheme.fontFamily.sans],
+      },
+    },
+  },
 }
