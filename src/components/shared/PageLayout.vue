@@ -1,8 +1,13 @@
 <template>
     <div>
         <header class="py-6">
-            <div class="container mx-auto px-4">
-                <h1 class="text-4xl font-bold text-center md:text-center">{{ sectionTitle }}</h1>
+            <div class="container mx-auto px-4 flex items-center justify-between">
+                <button v-if="showBackButton" @click="goBack"
+                    class="text-blue-500 flex items-center space-x-2 hover:text-blue-700">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Regresar</span>
+                </button>
+                <h1 class="text-4xl font-bold text-center flex-grow">{{ sectionTitle }}</h1>
             </div>
         </header>
         <main class="container mx-auto py-8">
@@ -12,12 +17,24 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
+
 const props = defineProps({
     sectionTitle: {
         type: String,
         required: true
+    },
+    showBackButton: {
+        type: Boolean,
+        default: false
     }
 })
+
+const router = useRouter()
+
+const goBack = () => {
+    router.back()
+}
 </script>
 
 <style scoped></style>

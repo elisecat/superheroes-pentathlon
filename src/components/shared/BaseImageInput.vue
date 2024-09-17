@@ -1,23 +1,24 @@
 <template>
     <div class="mb-4">
-        <label :for="name" class="block text-sm font-medium leading-6 text-gray-900">{{ label }}</label>
+        <label :for="name" class="block text-sm font-medium text-gray-900">{{ label }}</label>
         <input :id="name" type="file" accept="image/*" @change="handleFileChange"
-            class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+            class="block w-full rounded-md border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm px-3 py-2" />
         <span v-if="errorMessage" class="text-red-600 text-sm mt-1">{{ errorMessage }}</span>
-        <div v-if="previewSrc" class="mt-4">
-            <img :src="previewSrc" alt="Image preview"
+        <div v-if="previewSrc || modelValue" class="mt-4">
+            <img :src="previewSrc || modelValue" alt="Image preview"
                 class="w-32 h-32 object-cover border border-gray-300 rounded-md" />
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps({
     label: String,
     name: String,
     rules: Array,
+    modelValue: String,
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -32,9 +33,19 @@ const handleFileChange = (event) => {
     const reader = new FileReader()
 
     reader.onloadend = () => {
-        previewSrc.value = reader.result
-        validateImage(file)
-        emit('update:modelValue', reader.result)
+        const img = new Image()
+        img.src = reader.result
+
+        img.onload = () => {
+            if (img.width === 128 && img.height === 128) {
+                previewSrc.value = reader.result
+                validateImage(file)
+                emit('update:modelValue', reader.result)
+            } else {
+                errorMessage.value = 'Image dimensions must be 128x128px.'
+                previewSrc.value = null
+            }
+        }
     }
 
     reader.onerror = () => {
@@ -53,7 +64,6 @@ const validateImage = (file) => {
     errorMessage.value = ''
 }
 </script>
-
 <style scoped>
 .error {
     color: red;
