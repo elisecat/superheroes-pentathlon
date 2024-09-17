@@ -16,7 +16,7 @@
                 <button @click="editHero(hero.id)" class="text-blue-500 hover:text-blue-700" title="Editar">
                     <i class="fas fa-edit text-2xl"></i>
                 </button>
-                <button @click="deleteHero(hero)" class="text-red-500 hover:text-red-700" title="Eliminar">
+                <button @click="confirmDelete(hero.id)" class="text-red-500 hover:text-red-700" title="Eliminar">
                     <i class="fas fa-trash-can text-2xl"></i>
                 </button>
             </div>
@@ -27,22 +27,58 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useHeroesStore } from '@/stores/heroesStore'
+import Swal from 'sweetalert2'
 
 const props = defineProps({
     hero: Object
 })
 
+const router = useRouter()
+const heroesStore = useHeroesStore()
+
 const heroImage = computed(() => {
     return `${props.hero.picture}`
 })
-
-const router = useRouter()
 
 const editHero = (heroId) => {
     router.push({ name: 'EditHero', params: { heroId } })
 }
 
-const deleteHero = (hero) => {
-    console.log("Eliminando héroe:", hero);
+const confirmDelete = (heroId) => {
+    Swal.fire({
+        title: 'Are you sure you want to delete this record?',
+        text: 'This action cannot be undone',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            deleteHero(heroId)
+        }
+    })
+}
+
+const deleteHero = async (heroId) => {
+    try {
+        await heroesStore.deleteHero(heroId)
+        Swal.fire(
+            'Deleted',
+            'The hero has been successfully deleted.',
+            'success'
+        )
+        await heroesStore.fetchHeroes()
+    } catch (error) {
+        console.error('Error deleting the hero:', error)
+        Swal.fire(
+            'Error',
+            'There was an error deleting the hero.',
+            'error'
+        )
+    }
 }
 </script>

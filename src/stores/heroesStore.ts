@@ -31,7 +31,6 @@ export const useHeroesStore = defineStore('heroes', {
     async createHero(newHero) {
       try {
         const response = await api.post('/pentathlon/heroes', newHero)
-        console.log('Hero created:', response.data)
         await this.fetchHeroes()
       } catch (error) {
         console.error('Error creating hero:', error)
@@ -41,10 +40,19 @@ export const useHeroesStore = defineStore('heroes', {
     async updateHero(updatedHero) {
       try {
         const response = await api.put(`/pentathlon/heroes/${updatedHero.id}`, updatedHero)
-        console.log('Hero updated:', response.data)
         await this.fetchHeroes()
       } catch (error) {
         console.error('Error updating hero:', error)
+      }
+    },
+
+    async deleteHero(heroId) {
+      try {
+        const response = await api.delete(`/pentathlon/heroes/${heroId}`)
+        await this.fetchHeroes()
+      } catch (error) {
+        console.error('Error deleting hero:', error)
+        throw new Error('Error eliminando el héroe')
       }
     },
 

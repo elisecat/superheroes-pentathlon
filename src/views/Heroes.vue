@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useHeroesStore } from '@/stores/heroesStore'
 import HeroCard from '@/components/shared/HeroCard.vue'
 import PageLayout from '@/components/shared/PageLayout.vue'
@@ -18,7 +18,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const heroesStore = useHeroesStore()
-const heroes = ref([])
+const heroes = computed(() => heroesStore.heroes)
 
 onMounted(async () => {
     await heroesStore.fetchHeroes()
