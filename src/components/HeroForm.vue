@@ -9,25 +9,31 @@
                     <BaseImageInput v-model="hero.picture" label="Picture" name="picture" />
 
                     <BaseInput v-model="hero.attributes.agility" label="Agility" name="agility" type="number"
-                        placeholder="Enter agility" :rules="agilityRules" />
+                        placeholder="Enter agility" :rules="agilityRules" :isNumber="true"
+                        @input="validateNumber('agility')" />
 
                     <BaseInput v-model="hero.attributes.strength" label="Strength" name="strength" type="number"
-                        placeholder="Enter strength" :rules="strengthRules" />
+                        placeholder="Enter strength" :rules="strengthRules" :isNumber="true"
+                        @input="validateNumber('strength')" />
 
                     <BaseInput v-model="hero.attributes.weight" label="Weight" name="weight" type="number"
-                        placeholder="Enter weight" :rules="weightRules" />
+                        placeholder="Enter weight" :rules="weightRules" :isNumber="true"
+                        @input="validateNumber('weight')" />
 
                     <BaseInput v-model="hero.attributes.endurance" label="Endurance" name="endurance" type="number"
-                        placeholder="Enter endurance" :rules="enduranceRules" />
+                        placeholder="Enter endurance" :rules="enduranceRules" :isNumber="true"
+                        @input="validateNumber('endurance')" />
 
                     <BaseInput v-model="hero.attributes.charisma" label="Charisma" name="charisma" type="number"
-                        placeholder="Enter charisma" :rules="charismaRules" />
+                        placeholder="Enter charisma" :rules="charismaRules" :isNumber="true"
+                        @input="validateNumber('charisma')" />
                 </div>
 
                 <div class="flex justify-center mt-10">
-                    <BaseButton @click="handleSubmit" variant="purple-blue" size="md" class="w-full sm:w-2/4">
-                        {{ isEdit ? 'Update superhero' :
-                            'Create superhero' }} </BaseButton>
+                    <BaseButton :disabled="!isFormValid" @click="handleSubmit" variant="purple-blue" size="md"
+                        class="w-full sm:w-2/4">
+                        {{ isEdit ? 'Update superhero' : 'Create superhero' }}
+                    </BaseButton>
                 </div>
             </form>
         </div>
@@ -35,13 +41,14 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useHeroesStore } from '@/stores/heroesStore'
 import BaseInput from '@/components/shared/BaseInput.vue'
 import BaseButton from '@/components/shared/BaseButton.vue'
 import PageLayout from '@/components/shared/PageLayout.vue'
 import BaseImageInput from '@/components/shared/BaseImageInput.vue'
+import Swal from 'sweetalert2'
 
 export default defineComponent({
     components: {
@@ -82,23 +89,62 @@ export default defineComponent({
         const handleSubmit = async () => {
             if (isEdit.value) {
                 await heroesStore.updateHero(hero.value)
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Hero updated successfully!',
+                    timer: 1500,
+                })
             } else {
                 await heroesStore.createHero(hero.value)
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Hero created successfully!',
+                    timer: 1500,
+                })
             }
             router.push('/heroes')
         }
 
-        const nameRules = [value => !!value || 'Name is required', value => value.length >= 3 || 'Name must be at least 3 characters']
-        const agilityRules = [value => value >= 0 || 'Agility must be greater than or equal to 0', value => value <= 10 || 'Agility must be less than or equal to 10']
+        const validateNumber = (attribute) => {
+            const value = hero.value.attributes[attribute]
+            const regex = /^(10|[1-9])$/
+
+            if (!regex.test(value)) {
+                hero.value.attributes[attribute] = ''
+            }
+        }
+
+        const nameRules = [
+            value => !!value || 'Name is required',
+            value => value.length >= 3 || 'Name must be at least 3 characters'
+        ]
+        const agilityRules = [
+            value => !!value || 'Agility is required',
+            value => value >= 1 || 'Agility must be greater than or equal to 1',
+            value => value <= 10 || 'Agility must be less than or equal to 10'
+        ]
         const strengthRules = agilityRules
         const weightRules = agilityRules
         const enduranceRules = agilityRules
         const charismaRules = agilityRules
 
+        // Computed property to check if the form is valid
+        const isFormValid = computed(() => {
+            const { name, attributes } = hero.value
+            const isNameValid = name && name.length >= 3
+            const areAttributesValid = Object.values(attributes).every(attr => attr >= 1 && attr <= 10)
+
+            return isNameValid && areAttributesValid
+        })
+
         return {
             hero,
             isEdit,
             handleSubmit,
+            validateNumber,
+            isFormValid,
             nameRules,
             agilityRules,
             strengthRules,
@@ -109,3 +155,15 @@ export default defineComponent({
     },
 })
 </script>
+
+<style scoped>
+.hide-arrows::-webkit-outer-spin-button,
+.hide-arrows::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.hide-arrows {
+    -moz-appearance: textfield;
+}
+</style>

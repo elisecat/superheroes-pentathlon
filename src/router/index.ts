@@ -11,10 +11,7 @@ const routes = [
   { path: '/pentathlon', name: 'Pentathlon', component: Pentathlon },
   { path: '/heroes/create', name: 'CreateHero', component: HeroForm }, 
   { path: '/heroes/:heroId/edit', name: 'EditHero', component: HeroForm, props: true,  }, 
-
-
 ]
-
 
 const router = createRouter({
   history: createWebHistory(),

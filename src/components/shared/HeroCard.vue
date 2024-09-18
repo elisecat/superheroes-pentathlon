@@ -1,7 +1,7 @@
 <template>
     <div class="p-4 w-full md:w-1/2 lg:w-1/3">
         <div class="bg-white shadow-lg rounded-lg overflow-hidden flex relative">
-            <img :src="heroImage" alt="Hero Image" class="w-1/3 h-auto object-cover">
+            <img :src="heroImage" alt="Hero Image" class="w-1/3 h-auto object-contain">
 
             <div class="p-4 flex-1">
                 <h2 class="text-xl font-bold mb-2">{{ hero.name }}</h2>
@@ -66,19 +66,21 @@ const confirmDelete = (heroId) => {
 const deleteHero = async (heroId) => {
     try {
         await heroesStore.deleteHero(heroId)
-        Swal.fire(
-            'Deleted',
-            'The hero has been successfully deleted.',
-            'success'
-        )
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'The hero has been successfully deleted.',
+            timer: 1500,
+        })
         await heroesStore.fetchHeroes()
     } catch (error) {
         console.error('Error deleting the hero:', error)
-        Swal.fire(
-            'Error',
-            'There was an error deleting the hero.',
-            'error'
-        )
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'There was an error deleting the hero.',
+            timer: 1500,
+        })
     }
 }
 </script>

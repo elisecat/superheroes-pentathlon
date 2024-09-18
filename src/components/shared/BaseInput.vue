@@ -1,7 +1,8 @@
 <template>
     <div class="mb-4">
         <label :for="name" class="block text-sm font-medium text-gray-900">{{ label }}</label>
-        <input :id="name" :type="type" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
+        <input :id="name" :type="type" :value="modelValue" @blur="touched = true"
+            :pattern="isNumber ? '^[0-9]$|^10$' : ''" @input="$emit('update:modelValue', $event.target.value)"
             :placeholder="placeholder" :class="[
                 'block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
                 inputClass
@@ -11,13 +12,17 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
     modelValue: [String, Number],
     type: {
         type: String,
         default: 'text',
+    },
+    isNumber: {
+        type: Boolean,
+        default: false,
     },
     label: String,
     name: String,
@@ -27,6 +32,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+const touched = ref(false)
 
 const errorMessage = computed(() => {
     if (!props.rules) return ''

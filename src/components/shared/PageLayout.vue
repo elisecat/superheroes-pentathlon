@@ -6,14 +6,14 @@
                     <button v-if="showBackButton" @click="goBack"
                         class="text-blue-500 flex items-center space-x-2 hover:text-blue-700">
                         <i class="fas fa-arrow-left"></i>
-                        <span>Regresar</span>
+                        <span>Back</span>
                     </button>
                 </div>
 
                 <h1 class="text-4xl font-bold text-center w-full md:flex-grow">{{ sectionTitle }}</h1>
             </div>
         </header>
-        <main class="container mx-auto py-8">
+        <main class="container mx-auto py-4">
             <slot></slot>
         </main>
     </div>

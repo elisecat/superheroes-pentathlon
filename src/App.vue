@@ -6,7 +6,7 @@
       </div>
     </header>
 
-    <main :class="[$route.path !== '/home' ? 'container mx-auto py-8 flex-grow' : 'flex-grow']">
+    <main :class="[$route.path !== '/home' ? 'container mx-auto sm:py-4 flex-grow' : 'flex-grow']">
       <RouterView />
     </main>
 
