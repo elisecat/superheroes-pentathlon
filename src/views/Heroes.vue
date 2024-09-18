@@ -15,21 +15,21 @@
     </PageLayout>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from 'vue'
+<script lang="ts" setup>
+import { computed, onMounted } from 'vue'
 import { useHeroesStore } from '@/stores/heroesStore'
 import HeroCard from '@/components/shared/HeroCard.vue'
 import PageLayout from '@/components/shared/PageLayout.vue'
 import BaseButton from '@/components/shared/BaseButton.vue'
 import { useRouter } from 'vue-router'
-
+import type { Hero } from '@/types/Hero'
 const router = useRouter()
 const heroesStore = useHeroesStore()
-const heroes = computed(() => heroesStore.heroes)
+
+const heroes = computed<Hero[]>(() => heroesStore.heroes)
 
 onMounted(async () => {
     await heroesStore.fetchHeroes()
-    heroes.value = heroesStore.heroes
 })
 
 const navigateToCreate = () => {

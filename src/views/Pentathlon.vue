@@ -16,7 +16,9 @@
 
         <div class="bg-white shadow-lg rounded-lg p-6 text-center">
             <BaseButton v-for="(prueba, index) in pruebas" :key="index" :disabled="!canExecuteTest(index)"
-                @click="executeTest(prueba, index)" :class="['w-full sm:w-1/3', 'mb-4 sm:mr-2', colorVariants[index]]">
+                @click="executeTest(prueba, index)"
+                :class="['w-full sm:w-1/3', 'mb-4 sm:mr-2', colorVariants[index], { 'fade-out': prueba.executed }]"
+                v-show="!prueba.executed">
                 <template v-if="loadingPrueba === index">
                     <i class="fas fa-spinner fa-spin mr-2"></i> Running test...
                 </template>
@@ -24,10 +26,9 @@
                     {{ prueba.name }}
                 </template>
             </BaseButton>
-
-
         </div>
-        <div v-if="selectedHeroes.length === 3" class="bg-white shadow-lg rounded-lg p-6">
+
+        <div v-if="selectedHeroesComputed.length === 3" class="bg-white shadow-lg rounded-lg p-6">
             <h3 class="text-xl text-center font-bold mb-4">{{ allPruebasExecuted ? 'Podium' : 'Live Points' }}</h3>
 
             <div class="hidden sm:flex justify-between items-center mb-4 font-bold text-lg">
@@ -38,7 +39,6 @@
 
             <div v-for="(hero, index) in sortedHeroes" :key="index"
                 class="flex flex-col sm:flex-row justify-between items-center mb-4 border-b pb-4">
-
                 <div class="w-full sm:w-1/3 text-center mb-2 sm:mb-0">
                     <span class="bg-indigo-100 text-black rounded-full px-4 py-2">{{ hero.points || 0 }} points</span>
                 </div>
@@ -66,16 +66,19 @@
     </PageLayout>
 </template>
 
-<script setup>
-import { ref, onMounted, watch } from 'vue'
+<script lang="ts" setup>
+import { ref, onMounted, watch, computed } from 'vue'
 import { useHeroesStore } from '@/stores/heroesStore'
+import type { Hero } from '@/types/Hero';
 import PageLayout from '@/components/shared/PageLayout.vue'
 import BaseButton from '@/components/shared/BaseButton.vue'
 import BaseMultiSelect from '@/components/shared/BaseMultiSelect.vue'
 
 const heroesStore = useHeroesStore()
-const heroes = ref([])
-const selectedHeroes = ref([])
+
+const heroes = ref<Hero[]>([])
+
+const selectedHeroes = ref<Hero[]>([])
 
 const pruebas = ref([
     { name: '1. Skyscraper Climb', executed: false, calculation: 'climbSkyscrapers' },
@@ -93,20 +96,26 @@ const colorVariants = ref([
     'bg-purple-500 hover:bg-purple-700 text-white'
 ])
 
-const sortedHeroes = ref([])
+const sortedHeroes = ref<Hero[]>([])
+const selectedHeroesComputed = computed(() => selectedHeroes.value)
 const allPruebasExecuted = ref(false)
-const loadingPrueba = ref(null)
+const loadingPrueba = ref<number | null>(null)
 
 onMounted(async () => {
     await heroesStore.fetchHeroes()
-    heroes.value = heroesStore.heroes
+    heroes.value = heroesStore.heroes as Hero[]
 })
 
-
-const canExecuteTest = (index) => {
-    if (index === 0) return true
-    return pruebas.value[index - 1].executed
+const canExecuteTest = (index: number) => {
+    if (index === 0 && selectedHeroesComputed.value.length === 3) {
+        return true
+    }
+    if (index > 0 && index < pruebas.value.length) {
+        return pruebas.value[index - 1]?.executed
+    }
+    return false
 }
+
 
 const resetPruebas = () => {
     pruebas.value.forEach(prueba => prueba.executed = false)
@@ -118,10 +127,9 @@ const resetPruebas = () => {
     loadingPrueba.value = null
 }
 
-const executeTest = (prueba, index) => {
+const executeTest = (prueba: { name: string; executed: boolean; calculation: string }, index: number) => {
     if (!prueba.executed) {
         loadingPrueba.value = index
-
         updateHeroStats()
 
         setTimeout(() => {
@@ -129,7 +137,6 @@ const executeTest = (prueba, index) => {
             prueba.executed = true
 
             sortedHeroes.value = [...selectedHeroes.value].sort((a, b) => b.points - a.points)
-
             updateVictories()
 
             loadingPrueba.value = null
@@ -147,7 +154,7 @@ const updateHeroStats = () => {
     selectedHeroes.value.forEach((hero, index) => {
         hero.isLast = (index === sortedHeroes.value.length - 1)
         hero.wasFirst = (index === 0)
-        hero.wonAtLeastTwo = hero.wonAtLeastTwo || (hero.victories >= 2)
+        hero.wonAtLeastTwo = hero.wonAtLeastTwo || (hero.victories ?? 0) >= 2
     })
 
     if (sortedHeroes.value.length > 0) {
@@ -163,11 +170,11 @@ const updateHeroStats = () => {
 
 const updateVictories = () => {
     if (sortedHeroes.value.length > 0) {
-        sortedHeroes.value[0].victories = (sortedHeroes.value[0].victories || 0) + 1
+        sortedHeroes.value[0].victories = (sortedHeroes.value[0].victories ?? 0) + 1
     }
 }
 
-const calculatePoints = (testType) => {
+const calculatePoints = (testType: string) => {
     selectedHeroes.value.forEach(hero => {
         let puntos = 0
         switch (testType) {
@@ -188,11 +195,11 @@ const calculatePoints = (testType) => {
                 puntos = (hero.attributes.agility * 2) + (hero.wonAtLeastTwo ? 5 : 0)
                 break
         }
-        hero.points = (hero.points || 0) + puntos
+        hero.points = Math.max((hero.points || 0) + puntos, 0)
     })
 }
 
-watch(selectedHeroes, (newVal) => {
+watch(selectedHeroes, (newVal: Hero[]) => {
     sortedHeroes.value = [...newVal].map(hero => {
         if (!hero.points) {
             hero.points = 0
@@ -201,3 +208,13 @@ watch(selectedHeroes, (newVal) => {
     }).sort((a, b) => b.points - a.points)
 })
 </script>
+<style scoped>
+.fade {
+    transition: opacity 0.5s ease;
+    opacity: 1;
+}
+
+.fade-out {
+    opacity: 0;
+}
+</style>

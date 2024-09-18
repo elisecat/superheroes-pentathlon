@@ -47,9 +47,10 @@
     </nav>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { defineProps } from 'vue';
 import { ref } from 'vue'
+import type { Route } from '@/types/Route';
 
 const isOpen = ref(false)
 
@@ -57,12 +58,10 @@ const toggleMenu = () => {
     isOpen.value = !isOpen.value
 }
 
-const props = defineProps({
-    routes: {
-        type: Array,
-        required: true
-    }
-})
+const props = defineProps<{
+    routes: Route[];
+}>();
+
 </script>
 
 <style scoped></style>

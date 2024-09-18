@@ -11,7 +11,7 @@
     </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed, ref } from 'vue'
 
 const props = defineProps({
@@ -36,7 +36,8 @@ const touched = ref(false)
 
 const errorMessage = computed(() => {
     if (!props.rules) return ''
-    for (const rule of props.rules) {
+
+    for (const rule of props.rules as ((value: any) => boolean | string)[]) {
         const result = rule(props.modelValue)
         if (result !== true) return result
     }

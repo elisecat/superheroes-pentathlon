@@ -24,28 +24,27 @@
     </div>
 </template>
 
-<script setup>
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useHeroesStore } from '@/stores/heroesStore'
-import Swal from 'sweetalert2'
+<script lang="ts" setup>
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useHeroesStore } from '@/stores/heroesStore';
+import type { Hero } from '@/types/Hero';
+import Swal from 'sweetalert2';
 
-const props = defineProps({
-    hero: Object
-})
+const props = defineProps<{
+    hero: Hero;
+}>();
 
-const router = useRouter()
-const heroesStore = useHeroesStore()
+const router = useRouter();
+const heroesStore = useHeroesStore();
 
-const heroImage = computed(() => {
-    return `${props.hero.picture}`
-})
+const heroImage = computed(() => props.hero.picture);
 
-const editHero = (heroId) => {
-    router.push({ name: 'EditHero', params: { heroId } })
-}
+const editHero = (heroId: string | number) => {
+    router.push({ name: 'EditHero', params: { heroId } });
+};
 
-const confirmDelete = (heroId) => {
+const confirmDelete = (heroId: string | number) => {
     Swal.fire({
         title: 'Are you sure you want to delete this record?',
         text: 'This action cannot be undone',
@@ -55,32 +54,32 @@ const confirmDelete = (heroId) => {
         cancelButtonColor: '#3085d6',
         confirmButtonText: 'Yes, delete it',
         cancelButtonText: 'Cancel',
-        reverseButtons: true
+        reverseButtons: true,
     }).then((result) => {
         if (result.isConfirmed) {
-            deleteHero(heroId)
+            deleteHero(heroId);
         }
-    })
-}
+    });
+};
 
-const deleteHero = async (heroId) => {
+const deleteHero = async (heroId: string | any) => {
     try {
-        await heroesStore.deleteHero(heroId)
+        await heroesStore.deleteHero(heroId);
         Swal.fire({
             icon: 'success',
             title: 'Success',
             text: 'The hero has been successfully deleted.',
             timer: 1500,
-        })
-        await heroesStore.fetchHeroes()
+        });
+        await heroesStore.fetchHeroes();
     } catch (error) {
-        console.error('Error deleting the hero:', error)
+        console.error('Error deleting the hero:', error);
         Swal.fire({
             icon: 'error',
             title: 'Error',
             text: 'There was an error deleting the hero.',
             timer: 1500,
-        })
+        });
     }
-}
+};
 </script>

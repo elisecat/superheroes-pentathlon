@@ -13,8 +13,9 @@
     </footer>
 </template>
 
-<script setup>
-const currentYear = new Date().getFullYear()
+<script lang="ts" setup>
 
+const currentYear = new Date().getFullYear()
 const version = '0.2.0'
+
 </script>

@@ -25,46 +25,45 @@
     </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script lang="ts" setup>
+import { ref } from 'vue';
+import type { Hero } from '@/types/Hero';
 
-const props = defineProps({
-    options: {
-        type: Array,
-        required: true,
-    },
-    maxSelection: {
-        type: Number,
-        default: 3,
-    },
-})
-
-const emit = defineEmits(['update:modelValue'])
-
-const selectedItems = ref([])
-const errorMessage = ref('')
-
-const isSelected = (hero) => {
-    return selectedItems.value.some(item => item.id === hero.id)
+interface Props {
+    options: Hero[];
+    maxSelection: number;
 }
 
-const handleSelection = (event) => {
-    let heroId = event.target.value
-    let selectedHero = props.options.find(hero => hero.id === heroId)
+const props = defineProps<Props>();
+
+const emit = defineEmits(['update:modelValue']);
+
+const selectedItems = ref<Hero[]>([]);
+const errorMessage = ref<string>('');
+
+const isSelected = (hero: Hero): boolean => {
+    return selectedItems.value.some(item => item.id === hero.id);
+};
+
+const handleSelection = (event: Event) => {
+    const target = event.target as HTMLSelectElement;
+    const heroId = target.value;
+
+    const selectedHero = props.options.find(hero => hero.id === heroId);
 
     if (selectedHero && !isSelected(selectedHero) && selectedItems.value.length < props.maxSelection) {
-        selectedItems.value.push(selectedHero)
-        emit('update:modelValue', selectedItems.value)
-        errorMessage.value = ''
+        selectedItems.value.push(selectedHero);
+        emit('update:modelValue', selectedItems.value);
+        errorMessage.value = '';
     } else if (selectedItems.value.length >= props.maxSelection) {
-        event.target.value = ""
-        errorMessage.value = `You can only select up to ${props.maxSelection} heroes.`
+        target.value = "";
+        errorMessage.value = `You can only select up to ${props.maxSelection} heroes.`;
     }
-}
+};
 
-const removeItem = (item) => {
-    selectedItems.value = selectedItems.value.filter(selected => selected.id !== item.id)
-    emit('update:modelValue', selectedItems.value)
-}
+const removeItem = (item: Hero) => {
+    selectedItems.value = selectedItems.value.filter(selected => selected.id !== item.id);
+    emit('update:modelValue', selectedItems.value);
+};
 
 </script>

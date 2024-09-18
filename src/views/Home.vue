@@ -24,7 +24,7 @@
     </PageLayout>
 </template>
 
-<script>
+<script lang="ts">
 import { useRouter } from 'vue-router'
 import PageLayout from '@/components/shared/PageLayout.vue'
 import BaseButton from '@/components/shared/BaseButton.vue'
