@@ -1,9 +1,9 @@
 <template>
     <PageLayout :sectionTitle="isEdit ? 'Update superhero' : 'Create superhero'" :showBackButton="true">
         <div class="bg-white shadow-lg p-6 rounded-lg">
+            <p class="text-sm text-gray-500 pb-4">Allowed values for numeric fields: 0 to 10</p>
             <form @submit.prevent="handleSubmit" class="space-y-8">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <p class="text-sm text-gray-500">Allowed values for numeric fields: 0 to 10</p>
                     <BaseInput v-model="hero.name" label="* Name" name="name" placeholder="Enter hero name"
                         :rules="nameRules" />
 
@@ -51,6 +51,8 @@ import PageLayout from '@/components/shared/PageLayout.vue'
 import BaseImageInput from '@/components/shared/BaseImageInput.vue'
 import Swal from 'sweetalert2'
 import type { Hero } from '@/types/Hero'
+import defaultImage from '@/assets/default.jpg'
+import { convertImageToBase64 } from '@/services/imageService'
 
 export default defineComponent({
     components: {
@@ -97,6 +99,10 @@ export default defineComponent({
         })
 
         const handleSubmit = async () => {
+            if (!hero.value.picture) {
+                hero.value.picture = await convertImageToBase64(defaultImage)
+            }
+
             if (isEdit.value) {
                 await heroesStore.updateHero(hero.value)
                 Swal.fire({
@@ -119,7 +125,7 @@ export default defineComponent({
 
         const validateNumber = (attribute: keyof Hero['attributes']) => {
             const value = hero.value.attributes[attribute]
-            const regex = /^(10|[1-9])$/
+            const regex = /^(10|[1-9]|0)$/
 
             if (!regex.test(value.toString())) {
                 hero.value.attributes[attribute] = 0
@@ -131,7 +137,7 @@ export default defineComponent({
             (value: string) => value.length >= 3 || 'Name must be at least 3 characters'
         ]
         const attributeRules = [
-            (value: number) => !!value || 'This field is required',
+            (value: number | string) => (value !== null && value !== undefined && value !== '') || 'This field is required',
             (value: number) => value >= 0 || 'Value must be greater than or equal to 0',
             (value: number) => value <= 10 || 'Value must be less than or equal to 10'
         ]
@@ -160,15 +166,3 @@ export default defineComponent({
     },
 })
 </script>
-
-<style scoped>
-.hide-arrows::-webkit-outer-spin-button,
-.hide-arrows::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.hide-arrows {
-    -moz-appearance: textfield;
-}
-</style>
