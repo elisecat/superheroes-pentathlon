@@ -16,6 +16,6 @@
 <script lang="ts" setup>
 
 const currentYear = new Date().getFullYear()
-const version = '0.2.0'
+const version = '0.3.0'
 
 </script>
