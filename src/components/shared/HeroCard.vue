@@ -12,7 +12,7 @@
                 <p class="text-gray-600 text-md"><b>Charisma:</b> {{ hero.attributes.charisma }}</p>
             </div>
 
-            <div class="absolute top-2 right-2 flex flex-col items-center space-y-2">
+            <div class="absolute top-4 right-4 flex flex-col items-center space-y-2">
                 <button @click="editHero(hero.id)" class="text-blue-500 hover:text-blue-700" title="Editar">
                     <i class="fas fa-edit text-2xl"></i>
                 </button>

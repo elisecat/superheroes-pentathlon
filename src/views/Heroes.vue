@@ -1,6 +1,13 @@
 <template>
     <PageLayout sectionTitle="Superheroes">
+
         <div class="bg-white shadow-lg p-6">
+            <div class="flex justify-end mb-4">
+                <BaseButton @click="navigateToCreate" variant="purple-blue" size="md" class="w-fit">
+                    <i class="fas fa-plus"></i>&nbsp;
+                    <span>Create Superhero</span>
+                </BaseButton>
+            </div>
             <div class="flex flex-wrap -m-4">
                 <HeroCard v-for="hero in heroes" :key="hero.id" :hero="hero" />
             </div>
@@ -26,6 +33,6 @@ onMounted(async () => {
 })
 
 const navigateToCreate = () => {
-    router.push('/create-hero')
+    router.push('/heroes/create')
 }
 </script>

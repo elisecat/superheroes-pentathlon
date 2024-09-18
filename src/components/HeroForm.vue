@@ -25,8 +25,9 @@
                 </div>
 
                 <div class="flex justify-center mt-10">
-                    <BaseButton @click="handleSubmit" variant="purple-blue" size="md">{{ isEdit ? 'Update superhero' :
-                        'Create superhero' }}</BaseButton>
+                    <BaseButton @click="handleSubmit" variant="purple-blue" size="md" class="w-full sm:w-2/4">
+                        {{ isEdit ? 'Update superhero' :
+                            'Create superhero' }} </BaseButton>
                 </div>
             </form>
         </div>

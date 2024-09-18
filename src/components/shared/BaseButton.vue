@@ -31,7 +31,7 @@ const onClick = () => {
 }
 
 const buttonClass = computed(() => {
-    let baseClass = 'font-large rounded-lg text-center focus:ring-4 focus:outline-none w-full sm:w-1/2' // w-full para móviles, w-1/2 para pantallas grandes
+    let baseClass = 'font-large rounded-lg text-center focus:ring-4 focus:outline-none w-auto'
     let sizeClass = ''
     let gradientClass = ''
     let ringClass = ''

@@ -14,7 +14,8 @@
                 <p v-if="heroesStore.heroes.length < 3" class="text-xl text-gray-500 mb-4">
                     You need at least 3 superheroes to participate in the pentathlon.
                 </p>
-                <BaseButton @click="navigateToCreate" variant="purple-blue" size="lg">Create your superhero
+                <BaseButton @click="navigateToCreate" variant="purple-blue" size="md" class="w-full sm:w-2/4">Create
+                    your superhero
                 </BaseButton>
             </div>
         </div>
