@@ -6,7 +6,7 @@
       </div>
     </header>
 
-    <main :class="[$route.path !== '/home' ? 'container mx-auto py-8 flex-grow' : 'flex-grow']">
+    <main :class="[$route.path !== '/home' ? 'container mx-auto sm:py-4 flex-grow' : 'flex-grow']">
       <RouterView />
     </main>
 
@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import { RouterView, useRoute } from 'vue-router'
 import Navbar from './components/shared/Navbar.vue'
-import Footer from '@/components/shared/Footer.vue'
+import Footer from './components/shared/Footer.vue'
 
 const navRoutes = [
   { path: '/home', name: 'Home', icon: 'fas fa-home' },

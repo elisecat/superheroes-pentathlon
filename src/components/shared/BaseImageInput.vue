@@ -11,7 +11,7 @@
     </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref } from 'vue'
 
 const props = defineProps({
@@ -26,36 +26,42 @@ const emit = defineEmits(['update:modelValue'])
 const previewSrc = ref(null)
 const errorMessage = ref('')
 
-const handleFileChange = (event) => {
+const handleFileChange = (event: any) => {
     const file = event.target.files[0]
     if (!file) return
 
     const reader = new FileReader()
 
     reader.onloadend = () => {
-        const img = new Image()
-        img.src = reader.result
+        const img = new Image();
+
+        if (typeof reader.result === 'string') {
+            img.src = reader.result;
+        } else {
+            errorMessage.value = 'Error processing image.';
+            return;
+        }
 
         img.onload = () => {
             if (img.width === 128 && img.height === 128) {
-                previewSrc.value = reader.result
-                validateImage(file)
-                emit('update:modelValue', reader.result)
+                previewSrc.value = reader.result as any
+                validateImage(file);
+                emit('update:modelValue', reader.result);
             } else {
-                errorMessage.value = 'Image dimensions must be 128x128px.'
-                previewSrc.value = null
+                errorMessage.value = 'Image dimensions must be 128x128px.';
+                previewSrc.value = null;
             }
-        }
-    }
+        };
+    };
 
     reader.onerror = () => {
-        errorMessage.value = 'Error uploading image.'
-    }
+        errorMessage.value = 'Error uploading image.';
+    };
 
-    reader.readAsDataURL(file)
+    reader.readAsDataURL(file);
 }
 
-const validateImage = (file) => {
+const validateImage = (file: { size: number; }) => {
     if (file.size > 1024 * 1024) {
         errorMessage.value = 'Image size should not exceed 1MB.'
         previewSrc.value = null

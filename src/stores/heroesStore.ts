@@ -28,27 +28,27 @@ export const useHeroesStore = defineStore('heroes', {
       }
     },
 
-    async createHero(newHero) {
+    async createHero(newHero: any) {
       try {
-        const response = await api.post('/pentathlon/heroes', newHero)
+        await api.post('/pentathlon/heroes', newHero)
         await this.fetchHeroes()
       } catch (error) {
         console.error('Error creating hero:', error)
       }
     },
 
-    async updateHero(updatedHero) {
+    async updateHero(updatedHero: any) {
       try {
-        const response = await api.put(`/pentathlon/heroes/${updatedHero.id}`, updatedHero)
+        await api.put(`/pentathlon/heroes/${updatedHero.id}`, updatedHero)
         await this.fetchHeroes()
       } catch (error) {
         console.error('Error updating hero:', error)
       }
     },
 
-    async deleteHero(heroId) {
+    async deleteHero(heroId: string) {
       try {
-        const response = await api.delete(`/pentathlon/heroes/${heroId}`)
+        await api.delete(`/pentathlon/heroes/${heroId}`)
         await this.fetchHeroes()
       } catch (error) {
         console.error('Error deleting hero:', error)
@@ -56,7 +56,7 @@ export const useHeroesStore = defineStore('heroes', {
       }
     },
 
-    getHeroById(heroId) {
+    getHeroById(heroId: string) {
       return this.heroes.find(hero => hero.id === heroId)
     },
   },

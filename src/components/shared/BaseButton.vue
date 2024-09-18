@@ -4,7 +4,7 @@
     </button>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed } from 'vue'
 
 const props = defineProps({
@@ -22,7 +22,6 @@ const props = defineProps({
     },
 })
 
-// Emitir evento de click
 const emit = defineEmits(['click'])
 const onClick = () => {
     if (!props.disabled) {

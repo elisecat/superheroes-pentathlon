@@ -1,47 +1,58 @@
 <template>
     <PageLayout :sectionTitle="isEdit ? 'Update superhero' : 'Create superhero'" :showBackButton="true">
         <div class="bg-white shadow-lg p-6 rounded-lg">
+            <p class="text-sm text-gray-500 pb-4">Allowed values for numeric fields: 0 to 10</p>
             <form @submit.prevent="handleSubmit" class="space-y-8">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <BaseInput v-model="hero.name" label="Name" name="name" placeholder="Enter hero name"
+                    <BaseInput v-model="hero.name" label="* Name" name="name" placeholder="Enter hero name"
                         :rules="nameRules" />
 
                     <BaseImageInput v-model="hero.picture" label="Picture" name="picture" />
 
-                    <BaseInput v-model="hero.attributes.agility" label="Agility" name="agility" type="number"
-                        placeholder="Enter agility" :rules="agilityRules" />
+                    <BaseInput v-model="hero.attributes.agility" label="* Agility" name="agility" type="number"
+                        placeholder="Enter agility" :rules="agilityRules" :isNumber="true"
+                        @input="validateNumber('agility')" />
 
-                    <BaseInput v-model="hero.attributes.strength" label="Strength" name="strength" type="number"
-                        placeholder="Enter strength" :rules="strengthRules" />
+                    <BaseInput v-model="hero.attributes.strength" label="* Strength" name="strength" type="number"
+                        placeholder="Enter strength" :rules="strengthRules" :isNumber="true"
+                        @input="validateNumber('strength')" />
 
-                    <BaseInput v-model="hero.attributes.weight" label="Weight" name="weight" type="number"
-                        placeholder="Enter weight" :rules="weightRules" />
+                    <BaseInput v-model="hero.attributes.weight" label="* Weight" name="weight" type="number"
+                        placeholder="Enter weight" :rules="weightRules" :isNumber="true"
+                        @input="validateNumber('weight')" />
 
-                    <BaseInput v-model="hero.attributes.endurance" label="Endurance" name="endurance" type="number"
-                        placeholder="Enter endurance" :rules="enduranceRules" />
+                    <BaseInput v-model="hero.attributes.endurance" label="* Endurance" name="endurance" type="number"
+                        placeholder="Enter endurance" :rules="enduranceRules" :isNumber="true"
+                        @input="validateNumber('endurance')" />
 
-                    <BaseInput v-model="hero.attributes.charisma" label="Charisma" name="charisma" type="number"
-                        placeholder="Enter charisma" :rules="charismaRules" />
+                    <BaseInput v-model="hero.attributes.charisma" label="* Charisma" name="charisma" type="number"
+                        placeholder="Enter charisma" :rules="charismaRules" :isNumber="true"
+                        @input="validateNumber('charisma')" />
                 </div>
 
                 <div class="flex justify-center mt-10">
-                    <BaseButton @click="handleSubmit" variant="purple-blue" size="md" class="w-full sm:w-2/4">
-                        {{ isEdit ? 'Update superhero' :
-                            'Create superhero' }} </BaseButton>
+                    <BaseButton :disabled="!isFormValid" @click="handleSubmit" variant="purple-blue" size="md"
+                        class="w-full sm:w-2/4">
+                        {{ isEdit ? 'Update superhero' : 'Create superhero' }}
+                    </BaseButton>
                 </div>
             </form>
         </div>
     </PageLayout>
 </template>
 
-<script>
-import { defineComponent, ref, onMounted } from 'vue'
+<script lang="ts">
+import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useHeroesStore } from '@/stores/heroesStore'
 import BaseInput from '@/components/shared/BaseInput.vue'
 import BaseButton from '@/components/shared/BaseButton.vue'
 import PageLayout from '@/components/shared/PageLayout.vue'
 import BaseImageInput from '@/components/shared/BaseImageInput.vue'
+import Swal from 'sweetalert2'
+import type { Hero } from '@/types/Hero'
+import defaultImage from '@/assets/default.jpg'
+import { convertImageToBase64 } from '@/services/imageService'
 
 export default defineComponent({
     components: {
@@ -55,9 +66,11 @@ export default defineComponent({
         const router = useRouter()
         const heroesStore = useHeroesStore()
 
-        const hero = ref({
+        const hero = ref<Hero>({
+            id: '',
             name: '',
             picture: '',
+            points: 0,
             attributes: {
                 agility: 0,
                 strength: 0,
@@ -69,9 +82,15 @@ export default defineComponent({
 
         const isEdit = ref(false)
 
-        onMounted(() => {
-            const heroId = route.params.heroId
-            const selectedHero = heroesStore.getHeroById(heroId)
+        onMounted(async () => {
+            const heroId = route.params.heroId as string
+
+            let selectedHero = heroesStore.getHeroById(heroId)
+
+            if (!selectedHero) {
+                await heroesStore.fetchHeroes()
+                selectedHero = heroesStore.getHeroById(heroId)
+            }
 
             if (selectedHero) {
                 hero.value = JSON.parse(JSON.stringify(selectedHero))
@@ -80,31 +99,69 @@ export default defineComponent({
         })
 
         const handleSubmit = async () => {
+            if (!hero.value.picture) {
+                hero.value.picture = await convertImageToBase64(defaultImage)
+            }
+
             if (isEdit.value) {
                 await heroesStore.updateHero(hero.value)
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Hero updated successfully!',
+                    timer: 1500,
+                })
             } else {
                 await heroesStore.createHero(hero.value)
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Hero created successfully!',
+                    timer: 1500,
+                })
             }
             router.push('/heroes')
         }
 
-        const nameRules = [value => !!value || 'Name is required', value => value.length >= 3 || 'Name must be at least 3 characters']
-        const agilityRules = [value => value >= 0 || 'Agility must be greater than or equal to 0', value => value <= 10 || 'Agility must be less than or equal to 10']
-        const strengthRules = agilityRules
-        const weightRules = agilityRules
-        const enduranceRules = agilityRules
-        const charismaRules = agilityRules
+        const validateNumber = (attribute: keyof Hero['attributes']) => {
+            const value = hero.value.attributes[attribute]
+            const regex = /^(10|[1-9]|0)$/
+
+            if (!regex.test(value.toString())) {
+                hero.value.attributes[attribute] = 0
+            }
+        }
+
+        const nameRules = [
+            (value: string) => !!value || 'Name is required',
+            (value: string) => value.length >= 3 || 'Name must be at least 3 characters'
+        ]
+        const attributeRules = [
+            (value: number | string) => (value !== null && value !== undefined && value !== '') || 'This field is required',
+            (value: number) => value >= 0 || 'Value must be greater than or equal to 0',
+            (value: number) => value <= 10 || 'Value must be less than or equal to 10'
+        ]
+
+        const isFormValid = computed(() => {
+            const { name, attributes } = hero.value
+            const isNameValid = name && name.length >= 3
+            const areAttributesValid = Object.values(attributes).every(attr => attr >= 0 && attr <= 10)
+
+            return isNameValid && areAttributesValid
+        })
 
         return {
             hero,
             isEdit,
             handleSubmit,
+            validateNumber,
+            isFormValid,
             nameRules,
-            agilityRules,
-            strengthRules,
-            weightRules,
-            enduranceRules,
-            charismaRules,
+            agilityRules: attributeRules,
+            strengthRules: attributeRules,
+            weightRules: attributeRules,
+            enduranceRules: attributeRules,
+            charismaRules: attributeRules,
         }
     },
 })

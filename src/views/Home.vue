@@ -6,9 +6,11 @@
         <div class="bg-white shadow-lg rounded-lg p-6 text-center">
             <p class="text-lg mb-4">Start by creating your superheroes or simulate their participation in the
                 pentathlon!</p>
-            <div v-if="hasSuperheroes && heroesStore.heroes.length >= 3" class="flex justify-center space-x-4 mt-6">
-                <BaseButton @click="navigateToHeroes" variant="purple-blue" size="lg">Manage Superheroes</BaseButton>
-                <BaseButton @click="navigateToPentathlon" variant="purple-blue" size="lg">Start Pentathlon</BaseButton>
+            <div v-if="hasSuperheroes" class="flex justify-center space-x-4 mt-6">
+                <BaseButton v-if="heroesStore.heroes.length >= 1" @click="navigateToHeroes" variant="purple-blue"
+                    size="lg">Manage Superheroes</BaseButton>
+                <BaseButton v-if="heroesStore.heroes.length >= 3" @click="navigateToPentathlon" variant="purple-blue"
+                    size="lg">Start Pentathlon</BaseButton>
             </div>
             <div v-else class="text-center mt-6">
                 <p v-if="heroesStore.heroes.length < 3" class="text-xl text-gray-500 mb-4">
@@ -22,12 +24,12 @@
     </PageLayout>
 </template>
 
-<script>
+<script lang="ts">
 import { useRouter } from 'vue-router'
 import PageLayout from '@/components/shared/PageLayout.vue'
 import BaseButton from '@/components/shared/BaseButton.vue'
 import { useHeroesStore } from '@/stores/heroesStore'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 
 export default {
     components: { PageLayout, BaseButton },
@@ -36,6 +38,10 @@ export default {
         const heroesStore = useHeroesStore()
 
         const hasSuperheroes = computed(() => heroesStore.heroes.length > 0)
+
+        onMounted(async () => {
+            await heroesStore.fetchHeroes()
+        })
 
         const navigateToHeroes = () => {
             router.push('/heroes')
